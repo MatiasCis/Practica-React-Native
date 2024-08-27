@@ -1,12 +1,13 @@
 import { useState } from 'react';
 import { CustomView } from '../../components/ui/CustomView'
 import { Card } from '../../components/ui/Card';
-import { Switch } from 'react-native-gesture-handler';
 import { CustomSwitch } from '../../components/ui/CustomSwitch';
 import { Separator } from '../../components/Separator';
 
 
 export const SwitchScreen = () => {
+
+  
 
   // const [isEnabled, setIsEnabled] = useState(false);
   // const toggleSwitch = () => setIsEnabled(previousState => !previousState);
