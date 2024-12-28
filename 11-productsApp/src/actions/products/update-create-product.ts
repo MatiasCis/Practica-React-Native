@@ -1,6 +1,7 @@
 import axios, { isAxiosError } from "axios";
 import { tesloApi } from "../../config/api/tesloApi";
 import { Product } from "../../domain/entities/product";
+import { Form } from "formik";
 
 
 
@@ -19,16 +20,40 @@ export const updateCreateProduct = ( product: Partial<Product>) => {
 }
 
 
-const prepareImages = (images: string[]) => {
+const prepareImages = async(images: string[]) => {
 
+    const fileImages = images.filter( image => image.includes('file://'))    
+    const currentImages = images.filter( image => !image.includes('file://'))    
 
+    if ( fileImages.length > 0) {
+        const uploadPromises = fileImages.map(uploadImage)
+        const uploadImages = await Promise.all( uploadPromises)
+        currentImages.push(...uploadImages)
+    }
 
-
-    return images.map( 
+    return currentImages.map( 
         image => image.split('/').pop()
     )
 
 };
+
+const uploadImage = async(image: string) => {
+    const formData = new FormData();
+    formData.append('file', {
+        uri: image,
+        type: 'image/jpeg',
+        name: image.split('/').pop()
+
+    })
+
+    const { data } = await tesloApi.post<{image: string}>('/files/product', formData,{
+        headers: {
+            'Content-Type' : 'multipart/form-data'
+        }
+    })
+    return data.image;
+}
+
 
 
 const updateProduct = async( product: Partial<Product>) => {
@@ -36,7 +61,7 @@ const updateProduct = async( product: Partial<Product>) => {
     const {id, images = [], ...rest} = product;
 
     try {
-        const checkedImages = prepareImages(images);
+        const checkedImages = await prepareImages(images);
     
         const { data } = await tesloApi.patch(`/products/${id}`,{
             images: checkedImages,
@@ -65,7 +90,7 @@ const createProduct = async(product: Partial<Product>) => {
     const {id, images = [], ...rest} = product;
 
     try {
-        const checkedImages = prepareImages(images);
+        const checkedImages = await prepareImages(images);
     
         const { data } = await tesloApi.post(`/products/`,{
             images: checkedImages,

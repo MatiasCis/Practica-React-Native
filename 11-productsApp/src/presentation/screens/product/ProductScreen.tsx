@@ -15,6 +15,7 @@ import { MyIcon } from "../../components/ui/MyIcon"
 
 import { ProductImages } from "../../components/products/ProductImages"
 import { genders, sizes } from "../../../config/constants/constants"
+import { CameraAdapter } from "../../../config/adapters/camera-adapter";
 
 
 interface Props extends StackScreenProps<RootStackParams, 'ProductScreen'>{}
@@ -44,14 +45,9 @@ export const ProductScreen = ({ route}:Props) => {
     },
   })
 
-  
-
-
-
   if ( !product){
     return (<MainLayout title="cargando..."/>)
   }
-
 
   return (
     <Formik initialValues={product} onSubmit={ mutation.mutate}>
@@ -59,6 +55,13 @@ export const ProductScreen = ({ route}:Props) => {
           <MainLayout
               title={values.title}
               subTitle={`Precio: ${values.price}`}
+              rightAction={ async() => {
+
+                const photos = await CameraAdapter.getPicturesFromLibrary();
+                console.log({photos})
+                setFieldValue('images', [...values.images, ...photos])
+              }}
+              rightActionIcon="image-outline"
               >
 
                 <ScrollView style={{flex: 1}}>
@@ -173,7 +176,6 @@ export const ProductScreen = ({ route}:Props) => {
         )
       }
 
-    
     </Formik>
   )
 }
